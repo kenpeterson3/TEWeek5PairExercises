@@ -93,34 +93,64 @@ SELECT * FROM city WHERE name = 'Smallville'
 -- country's year of independence is within the range of 1800 and 1972 
 -- (exclusive). 
 -- (590 rows affected)
+SELECT language, cl.isofficial
+FROM countrylanguage cl
+JOIN country c ON cl.countrycode = c.code
+WHERE c.indepyear BETWEEN 1800 AND 1972
+ORDER BY countrycode
 
 BEGIN TRANSACTION;
 
-UPDATE countrylanguage SET 
-
+UPDATE countrylanguage 
+SET isofficial = NOT isofficial
+FROM country 
+WHERE indepyear BETWEEN 1800 AND 1972
 
 COMMIT;
 
 ROLLBACK;
 
+SELECT language, cl.isofficial
+FROM countrylanguage cl
+JOIN country c ON cl.countrycode = c.code
+WHERE c.indepyear BETWEEN 1800 AND 1972
+ORDER BY countrycode
 -- 9. Convert population so it is expressed in 1,000s for all cities. (Round to
 -- the nearest integer value greater than 0.)
 -- (4079 rows affected)
 
+SELECT name,population 
+FROM city
+ORDER BY population ASC
+
 BEGIN TRANSACTION;
 
+UPDATE city 
+SET population = CEILING(population/1000.0)
 
 COMMIT;
 
 ROLLBACK;
+
+SELECT name,population 
+FROM city
+ORDER BY population DESC
 
 -- 10. Assuming a country's surfacearea is expressed in miles, convert it to 
 -- meters for all countries where French is spoken by more than 20% of the 
 -- population.
 -- (7 rows affected)
+SELECT name, surfacearea, cl.language, cl.percentage
+FROM countrylanguage cl
+JOIN country ON country.code = cl.countrycode
+WHERE percentage > 20.000 AND language = 'French'
 
 BEGIN TRANSACTION;
 
+UPDATE country
+SET surfacearea = surfacearea*1609.344
+FROM countrylanguage 
+WHERE percentage > 20.000 AND language = 'French'
 
 COMMIT;
 
